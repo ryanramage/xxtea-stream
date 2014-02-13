@@ -4,6 +4,7 @@ var Transform = require('stream').Transform,
     bops = require('bops');
 
 function Encrypt (key, opts) {
+  if (key.length !== 16) throw new Error('Key must be 16 bytes');
   this.key = key;
   Transform.call(this, opts);
 }
@@ -24,6 +25,7 @@ function EncryptBlock(str, key) {
 
 
 function Decrypt(key, opts) {
+  if (key.length !== 16) throw new Error('Key must be 16 bytes');
   this.key = key;
   Transform.call(this, opts);
 }
@@ -33,7 +35,8 @@ exports.Decrypt = Decrypt;
 
 Decrypt.prototype._write = function(chunk, encoding, callback) {
   var out = DecryptBlock(chunk, this.key);
-  this.push(out);
+  if (process.browser) this.push(bops.to(out));
+  else this.push(out);
   callback();
 }
 
