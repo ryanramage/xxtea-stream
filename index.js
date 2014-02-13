@@ -12,8 +12,8 @@ util.inherits(Encrypt, Transform);
 exports.Encrypt = Encrypt;
 
 Encrypt.prototype._write = function(chunk, encoding, callback) {
-  var from_str = bops.to(chunk, 'utf-8');
-  var out = EncryptBlock(from_str, this.key);
+  //var from_str = bops.to(chunk, 'utf-8');
+  var out = EncryptBlock(chunk, this.key);
   this.push(out);
   callback();
 }
@@ -34,8 +34,8 @@ util.inherits(Decrypt, Transform);
 exports.Decrypt = Decrypt;
 
 Decrypt.prototype._write = function(chunk, encoding, callback) {
-  var from_str = bops.to(chunk, 'utf-8');
-  var out = DecryptBlock(from_str, this.key);
+  //var from_str = bops.to(chunk, 'utf-8');
+  var out = DecryptBlock(chunk, this.key);
   this.push(out);
   callback();
 }
