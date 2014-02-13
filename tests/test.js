@@ -19,7 +19,8 @@ test('symetric streaming encryption', function(t){
     fs.createReadStream("./out.text.tea")
       .pipe(new xxtea.Decrypt('8339d93jdooe2dwd', 'utf8'))
       .pipe(concat(function(contents) {
-        t.equal('Something secret should not be seen. Very amaze.', contents.toString('utf-8'))
+        console.log(contents.toString('utf-8'));
+        t.equal(contents.toString('utf-8'), 'Something secret should not be seen. Very amaze.')
       }))
   }
 })
