@@ -13,6 +13,16 @@
   ],
   "author": "Ryan Ramage",
   "license": "BSD-2-Clause",
+  "github": "https://github.com/ryanramage/xxtea-stream",
+  "bugs": {
+    "url": "https://github.com/ryanramage/xxtea-stream/issues"
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/ryanramage/xxtea-stream.git"
+    }
+  ],
   "dependencies": {
     "bops": "~0.1.1"
   },
