@@ -1,47 +1,71 @@
 var Transform = require('stream').Transform,
+    chunks = require('chunk-stream'),
     util = require('util'),
     tea = require('./lib/TEA');
-    bops = require('bops');
 
-function Encrypt (key, opts) {
+
+function EncryptSetup(key, opts, cb) {
   if (key.length !== 16) throw new Error('Key must be 16 bytes');
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
+  if (!opts) opts = {};
+  if (!cb) cb = function() {}
+
+  var through = chunks(512);
+  return through.pipe(new Encrypt(key, opts, cb))
+}
+
+exports.Encrypt = EncryptSetup;
+
+
+function Encrypt (key, opts, cb) {
   this.key = key;
+  this.on('finish', function(){
+    cb();
+  })
   Transform.call(this, opts);
 }
 util.inherits(Encrypt, Transform);
-exports.Encrypt = Encrypt;
+
 
 Encrypt.prototype._write = function(chunk, encoding, callback) {
-  var out = EncryptBlock(chunk, this.key);
+  var out = tea.encrypt(chunk, this.key);
+  this.push(out);
+  callback();
+}
+
+function DecryptSetup(key, opts, cb) {
+  if (key.length !== 16) throw new Error('Key must be 16 bytes');
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
+  if (!opts) opts = {};
+  if (!cb) cb = function() {}
+
+  var through = chunks(512);
+  return through.pipe(new Decrypt(key, opts, cb))
+}
+
+exports.Decrypt = DecryptSetup;
+
+function Decrypt(key, opts, cb) {
+  this.key = key;
+  this.on('finish', function(){
+    cb();
+  })
+  Transform.call(this, opts);
+}
+
+util.inherits(Decrypt, Transform);
+
+Decrypt.prototype._write = function(chunk, encoding, callback) {
+  var out = tea.decrypt(chunk, this.key);
   this.push(out);
   callback();
 }
 
 
-function EncryptBlock(str, key) {
-  return tea.encrypt(str, key);
-}
-
-
-
-function Decrypt(key, opts) {
-  if (key.length !== 16) throw new Error('Key must be 16 bytes');
-  this.key = key;
-  Transform.call(this, opts);
-}
-
-util.inherits(Decrypt, Transform);
-exports.Decrypt = Decrypt;
-
-Decrypt.prototype._write = function(chunk, encoding, callback) {
-  var out = DecryptBlock(chunk, this.key);
-  if (process.browser) this.push(bops.to(out));
-  else this.push(out);
-  callback();
-}
-
-
-function DecryptBlock(str, key) {
-  return tea.decrypt(str, key);
-}
 

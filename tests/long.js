@@ -5,30 +5,31 @@ var xxtea = require('../'),
     concat = require('concat-stream'),
     streamEqual = require('stream-equal'),
     setup = require('./setup/'),
-    dir = './tmp/image/';
+    dir = './tmp/long/';
 
 setup.setup(dir);
 
-test('image streaming encryption', function(t){
+test('large data to have multiple pipe calls', function(t){
 
-  t.plan(2);
+  t.plan(1);
 
-  fs.createReadStream("./tests/assets/tape_drive.png")
+  fs.createReadStream("./tests/assets/long.txt")
     .pipe(new xxtea.Encrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
-    .pipe(fs.createWriteStream(dir + 'tape_drive.png.tea'))
+    .pipe(fs.createWriteStream(dir + 'long.txt.tea'))
     .on('close', decrypt);
 
   function decrypt(){
-    fs.createReadStream(dir + "tape_drive.png.tea")
+    console.log('begin decrypt');
+    fs.createReadStream(dir + "long.txt.tea")
       .pipe(new xxtea.Decrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
-      .pipe(fs.createWriteStream(dir + 'tape_drive.png'))
+      .pipe(fs.createWriteStream(dir + 'long.txt'))
       .on('close', function(){
-        t.ok(true);
-        var readStream1 = fs.createReadStream("./tests/assets/tape_drive.png");
-        var readStream2 = fs.createReadStream(dir + 'tape_drive.png');
+        var readStream1 = fs.createReadStream("./tests/assets/long.txt");
+        var readStream2 = fs.createReadStream(dir + 'long.txt');
         streamEqual(readStream1, readStream2, function(err, equal) {
           t.ok(equal)
         });
+
       })
   }
 })
