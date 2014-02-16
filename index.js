@@ -1,71 +1,112 @@
-var Transform = require('stream').Transform,
-    chunks = require('chunk-stream'),
+var through = require('through')
     util = require('util'),
     tea = require('./lib/TEA');
 
 
-function EncryptSetup(key, opts, cb) {
+function Encrypt(key, opts, cb) {
   if (key.length !== 16) throw new Error('Key must be 16 bytes');
-  if (typeof opts === 'function') {
-    cb = opts
-    opts = {}
-  }
-  if (!opts) opts = {};
-  if (!cb) cb = function() {}
-
-  var through = chunks(512);
-  return through.pipe(new Encrypt(key, opts, cb))
-}
-
-exports.Encrypt = EncryptSetup;
-
-
-function Encrypt (key, opts, cb) {
   this.key = key;
-  this.on('finish', function(){
-    cb();
-  })
-  Transform.call(this, opts);
-}
-util.inherits(Encrypt, Transform);
-
-
-Encrypt.prototype._write = function(chunk, encoding, callback) {
-  var out = tea.encrypt(chunk, this.key);
-  this.push(out);
-  callback();
-}
-
-function DecryptSetup(key, opts, cb) {
-  if (key.length !== 16) throw new Error('Key must be 16 bytes');
   if (typeof opts === 'function') {
     cb = opts
     opts = {}
   }
-  if (!opts) opts = {};
+  if (!opts) opts = { };
   if (!cb) cb = function() {}
 
-  var through = chunks(512);
-  return through.pipe(new Decrypt(key, opts, cb))
+
+  var chunk = new Buffer(0),
+      self = this,
+      chunkSize = 3200;
+
+  var write = function (data) {
+    // Ensure that it's a Buffer
+    if (!Buffer.isBuffer(data)) {
+      data = new Buffer(data)
+    }
+    var remainingSize = chunkSize - chunk.length
+    chunk = Buffer.concat([chunk, data.slice(0, remainingSize)])
+    data = data.slice(remainingSize)
+
+    if (chunk.length === chunkSize) {
+      self.handle_chunk(chunk, this)
+
+      // Create as many full buffers of `chunkSize` as possible from `data`
+      while (data.length > chunkSize) {
+        self.handle_chunk(data.slice(0, chunkSize), this)
+        data = data.slice(chunkSize)
+      }
+
+      // Whatever data remains, set the chunk to that so the next `data` event
+      // or `end` event can queue it along
+      chunk = data
+    }
+  }
+  var end = function (data) {
+    self.handle_chunk(chunk, this);
+    this.queue(null);
+  }
+  return through(write, end)
 }
 
-exports.Decrypt = DecryptSetup;
+Encrypt.prototype.handle_chunk = function(chunk, thr) {
+  var out = tea.encrypt(chunk, this.key);
+  thr.queue(out)
+}
+
+exports.Encrypt = Encrypt;
+
 
 function Decrypt(key, opts, cb) {
+  if (key.length !== 16) throw new Error('Key must be 16 bytes');
   this.key = key;
-  this.on('finish', function(){
-    cb();
-  })
-  Transform.call(this, opts);
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
+  if (!opts) opts = {};
+  if (!cb) cb = function() {}
+
+  var chunk = new Buffer(0),
+      self = this,
+      chunkSize = 3200;
+
+  var write = function (data) {
+    // Ensure that it's a Buffer
+    if (!Buffer.isBuffer(data)) {
+      data = new Buffer(data)
+    }
+    var remainingSize = chunkSize - chunk.length
+    chunk = Buffer.concat([chunk, data.slice(0, remainingSize)])
+    data = data.slice(remainingSize)
+
+    if (chunk.length === chunkSize) {
+      self.handle_chunk(chunk, this)
+
+      // Create as many full buffers of `chunkSize` as possible from `data`
+      while (data.length > chunkSize) {
+        self.handle_chunk(data.slice(0, chunkSize), this)
+        data = data.slice(chunkSize)
+      }
+
+      // Whatever data remains, set the chunk to that so the next `data` event
+      // or `end` event can queue it along
+      chunk = data
+    }
+  }
+  var end = function (data) {
+    self.handle_chunk(chunk, this)
+    this.queue(null);
+  }
+  return through(write, end)
 }
 
-util.inherits(Decrypt, Transform);
 
-Decrypt.prototype._write = function(chunk, encoding, callback) {
+Decrypt.prototype.handle_chunk = function(chunk, thr) {
   var out = tea.decrypt(chunk, this.key);
-  this.push(out);
-  callback();
+  thr.queue(out);
 }
+
+exports.Decrypt = Decrypt;
 
 
 
