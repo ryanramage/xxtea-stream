@@ -1,16 +1,15 @@
-var through = require('through')
+var through = require('through'),
+    bops = require('bops'),
     util = require('util'),
     tea = require('./lib/TEA');
 
 
-function Encrypt(key, opts, cb) {
+function Encrypt(key, cb) {
+  if (!bops.is(key)) {
+    key = bops.from(key, 'utf8')
+  }
   if (key.length !== 16) throw new Error('Key must be 16 bytes');
   this.key = key;
-  if (typeof opts === 'function') {
-    cb = opts
-    opts = {}
-  }
-  if (!opts) opts = { };
   if (!cb) cb = function() {}
 
 
@@ -56,14 +55,12 @@ Encrypt.prototype.handle_chunk = function(chunk, thr) {
 exports.Encrypt = Encrypt;
 
 
-function Decrypt(key, opts, cb) {
+function Decrypt(key, cb) {
+  if (!bops.is(key)) {
+    key = bops.from(key, 'utf8')
+  }
   if (key.length !== 16) throw new Error('Key must be 16 bytes');
   this.key = key;
-  if (typeof opts === 'function') {
-    cb = opts
-    opts = {}
-  }
-  if (!opts) opts = {};
   if (!cb) cb = function() {}
 
   var chunk = new Buffer(0),

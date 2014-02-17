@@ -32,15 +32,25 @@ Install
     npm install xxtea-stream
 
 
+Usage
+-----
+
+    var xxtea = require('xxtea');
+    var pipe = new xxtea.Encrypt('8339d93jdooe2dwd')
+    var pipe = new xxtea.Decrypt('8339d93jdooe2dwd')
+
+When creating an instance, you must tpass in a string of exactly 16 characters (bytes) as the
+key. The key is symetric in that the same must be passed in the Encrypt and Decrypt function.
+
+
+
 Encryption
 ----------
 
     var xxtea = require('xxtea');
-    var bops = require('bops')
-
 
     fs.createReadStream(".secret.txt")
-      .pipe(new xxtea.Encrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
+      .pipe(new xxtea.Encrypt('8339d93jdooe2dwd')))
       .pipe(fs.createWriteStream('out.text.tea'))
       .on('close', decrypt);
 
@@ -52,7 +62,7 @@ Decryption
     var bops = require('bops')
 
     fs.createReadStream("./out.text.tea")
-      .pipe(new xxtea.Decrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
+      .pipe(new xxtea.Decrypt(8339d93jdooe2dwd'))
       .pipe(concat(function(contents) {
         contents.toString('utf-8'); // shhh - dont tell!
       }))
@@ -63,12 +73,12 @@ In Browser
     var drop = require('drag-and-drop-files');
     var createReadStream = require('filereader-stream');
     var xxtea = require('xxtea-stream');
-    var bops = require('bops');
+
 
     drop(document.body, function(files) {
       var first = files[0]
       createReadStream(first)
-        .pipe(new xxtea.Decrypt(bops.from("secret12secret12")))
+        .pipe(new xxtea.Decrypt("secret12secret12"))
         .pipe(concat(function(contents) {
             console.log(contents.toString('utf-8')); // shhh - dont tell!
         }))

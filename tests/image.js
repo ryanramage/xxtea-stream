@@ -14,13 +14,13 @@ test('image streaming encryption', function(t){
   t.plan(2);
 
   fs.createReadStream("./tests/assets/tape_drive.png")
-    .pipe(new xxtea.Encrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
+    .pipe(new xxtea.Encrypt('8339d93jdooe2dwd'))
     .pipe(fs.createWriteStream(dir + 'tape_drive.png.tea'))
     .on('close', decrypt);
 
   function decrypt(){
     fs.createReadStream(dir + "tape_drive.png.tea")
-      .pipe(new xxtea.Decrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
+      .pipe(new xxtea.Decrypt('8339d93jdooe2dwd'))
       .pipe(fs.createWriteStream(dir + 'tape_drive.png'))
       .on('close', function(){
         t.ok(true);

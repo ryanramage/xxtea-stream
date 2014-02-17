@@ -14,14 +14,14 @@ test('large data to have multiple pipe calls', function(t){
   t.plan(1);
 
   fs.createReadStream("./tests/assets/long.txt")
-    .pipe(new xxtea.Encrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
+    .pipe(new xxtea.Encrypt('8339d93jdooe2dwd'))
     .pipe(fs.createWriteStream(dir + 'long.txt.tea'))
     .on('close', decrypt);
 
   function decrypt(){
     console.log('begin decrypt');
     fs.createReadStream(dir + "long.txt.tea")
-      .pipe(new xxtea.Decrypt(bops.from('8339d93jdooe2dwd', 'utf8')))
+      .pipe(new xxtea.Decrypt('8339d93jdooe2dwd'))
       .pipe(fs.createWriteStream(dir + 'long.txt'))
       .on('close', function(){
         var readStream1 = fs.createReadStream("./tests/assets/long.txt");
