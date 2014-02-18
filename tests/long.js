@@ -28,6 +28,7 @@ test('large data to have multiple pipe calls', function(t){
         var readStream2 = fs.createReadStream(dir + 'long.txt');
         streamEqual(readStream1, readStream2, function(err, equal) {
           t.ok(equal)
+          setup.teardown(dir);
         });
 
       })

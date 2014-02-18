@@ -27,7 +27,8 @@ test('image audio encryption', function(t){
         var readStream1 = fs.createReadStream("./tests/assets/Miaow-07-Bubble.m4a");
         var readStream2 = fs.createReadStream(dir + 'Miaow-07-Bubble.m4a');
         streamEqual(readStream1, readStream2, function(err, equal) {
-          t.ok(equal)
+          t.ok(equal);
+          setup.teardown(dir);
         });
       })
   }

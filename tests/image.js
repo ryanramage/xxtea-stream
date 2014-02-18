@@ -28,6 +28,7 @@ test('image streaming encryption', function(t){
         var readStream2 = fs.createReadStream(dir + 'tape_drive.png');
         streamEqual(readStream1, readStream2, function(err, equal) {
           t.ok(equal)
+          setup.teardown(dir);
         });
       })
   }
