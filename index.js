@@ -91,15 +91,15 @@ function Decrypt(key, cb) {
     }
   }
   var end = function (data) {
-    self.handle_chunk(chunk, this)
+    self.handle_chunk(chunk, this, true);
     this.queue(null);
   }
   return through(write, end)
 }
 
 
-Decrypt.prototype.handle_chunk = function(chunk, thr) {
-  var out = tea.decrypt(chunk, this.key);
+Decrypt.prototype.handle_chunk = function(chunk, thr, truncate) {
+  var out = tea.decrypt(chunk, this.key, truncate);
   thr.queue(out);
 }
 
