@@ -85,3 +85,21 @@ In Browser
     })
 
 
+Decrypt an audio file and play it
+
+    var oReq = new XMLHttpRequest();
+    oReq.open("GET", "younger.mp3.tea", true);
+    oReq.responseType = "blob";
+
+    oReq.onload = function (oEvent) {
+
+      createReadStream(oReq.response)
+         .pipe(new tea.Decrypt(bops.from("secret12secret12")))
+         .pipe(concat(function(contents) {
+         var objectURL = window.URL.createObjectURL(new Blob([contents], {type: 'audio/mpeg'} ));
+         new Audio(objectURL).play();
+      }))
+    };
+    oReq.send(null);
+
+
