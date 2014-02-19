@@ -5,6 +5,9 @@ A node/browserify streaming xxtea encryption and decryption module
 
 [![Build Status](https://secure.travis-ci.org/ryanramage/xxtea-stream.png)](http://travis-ci.org/ryanramage/xxtea-stream)
 
+[![browser support](https://ci.testling.com/ryanramage/xxtea-stream.png)
+](https://ci.testling.com/ryanramage/xxtea-stream)
+
 I wanted to get my hands dirty with a simple encryption that would stream and work both node and browser side.
 This is the result.
 
