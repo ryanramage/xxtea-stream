@@ -1,6 +1,6 @@
 {
   "name": "xxtea-stream",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A node/browserify streaming xxtea encryption and decryption module",
   "main": "index.js",
   "scripts": {
